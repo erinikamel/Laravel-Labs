@@ -2,36 +2,43 @@
 
 namespace App\Http\Controllers;
 
+
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Post;
+use App\Models\User;
+use App\Http\Requests\StorePostRequest;
+use App\Models\Comment;
+use Carbon\Carbon;
+
+
 
 class PostController extends Controller
 {
 
-    public function getPost($postId){
-        $allPosts = [
-            ['id' => 1 , 'title' => 'Learn PHP', 'posted_by' => 'Ahmed', 'creation_date' => '2022-10-22'],
-            ['id' => 2 , 'title' => 'Solid Principles', 'posted_by' => 'Mohamed', 'creation_date' => '2022-10-15'],
-            ['id' => 3 , 'title' => 'Design Patterns', 'posted_by' => 'Ali', 'creation_date' => '2018-04-13'],
-        ];
+    // public function getPost($postId){
 
-        $matchedPost='';
+    //     $allPosts = Post::all();
 
-        foreach ($allPosts as $p) {
-            if($p['id'] == $postId){
-                $matchedPost=$p;
-                return $p;
-            }
-        }
-    }
+    //     $matchedPost='';
+
+    //     foreach ($allPosts as $p) {
+    //         if($p['id'] == $postId){
+    //             $matchedPost=$p;
+    //             return $p;
+    //         }
+    //     }
+    // }
+
+    //invoke it like this in methods
+    //'post' =>  $this->getPost($postId),
+
 
     public function index()
     {
-        $allPosts = [
-            ['id' => 1 , 'title' => 'Learn PHP', 'posted_by' => 'Ahmed', 'creation_date' => '2022-10-22'],
-            ['id' => 2 , 'title' => 'Solid Principles', 'posted_by' => 'Mohamed', 'creation_date' => '2022-10-15'],
-            ['id' => 3 , 'title' => 'Design Patterns', 'posted_by' => 'Ali', 'creation_date' => '2018-04-13'],
-        ];
+        $allPosts = Post::paginate(7);
 
+        // dd($allPosts);
         return view('posts.index', [
           'posts' => $allPosts
         ]);
@@ -39,39 +46,75 @@ class PostController extends Controller
 
     public function create()
     {
-        return view('posts.create');
+        $allUsers = User::all();
+
+        return view('posts.create',[
+            'users' => $allUsers
+        ]);
     }
 
-    public function store()
+    public function store(StorePostRequest $request)
     {
-        return redirect ()->route ('posts.index');
+        $data = request()->all();
+
+        //you can save each separately as follows
+        //$title = request()->title
+
+        // save to model named Post
+        Post::create([
+            //you can define it any way from those
+            //'title' => request()->title;
+            //'title' => $title;
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'user_id' => $data['post_creator'],
+        ]);
+
+
+
+        return to_route('posts.index');
     }
 
     public function show($postId)
     {
-
         return view('posts.show', [
-          'post' =>  $this->getPost($postId)
+          'post' =>  Post::find($postId)
         ]);
 
     }
 
 
-    public function update(){
-        return redirect ()->route ('posts.index');
+    public function update(StorePostRequest $request, $postId){
+
+        $data = request()->all();
+
+        Post::find($postId)->update([
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'user_id' => $data['post_creator'],
+        ]);
+
+        return to_route('posts.index');
     }
+
 
     public function edit($postId)
     {
+        $allUsers = User::all();
+
         return view('posts.edit', [
-            'post' =>  $this->getPost($postId)
+            'post' => Post::find($postId),
+            'users' => $allUsers
           ]);
 
     }
 
 
     public function destroy($postId){
-        return "<h3>Post deleted!</h3>";
+
+        Post::find($postId)->delete();
+
+        return to_route('posts.index');
     }
 
 
