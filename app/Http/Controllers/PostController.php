@@ -47,6 +47,8 @@ class PostController extends Controller
         else {
         $path = null;
         }
+
+
         // save to model named Post
         Post::create([
             //you can define it any way from those
