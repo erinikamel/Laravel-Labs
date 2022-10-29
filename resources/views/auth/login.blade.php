@@ -57,6 +57,10 @@
                                     {{ __('Login') }}
                                 </button>
 
+                                <a class="btn btn-dark" href="{{route('auth.github')}}">Log in with gitHub</a>
+                                <a class="btn btn-dark" href="{{route('auth.google')}}">Log in with Google</a>
+
+
                                 @if (Route::has('password.request'))
                                     <a class="btn btn-link" href="{{ route('password.request') }}">
                                         {{ __('Forgot Your Password?') }}
@@ -65,6 +69,7 @@
                             </div>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>

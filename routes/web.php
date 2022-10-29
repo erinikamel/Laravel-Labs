@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Jobs\PruneOldPostsJob;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -50,3 +53,46 @@ Route::get('/delete-old-posts', function () {
    return 'Removing older posts...';
 
 });
+
+Route::get('/auth/redirect', function () {
+    return Socialite::driver('github')->redirect();
+})->name('auth.github');
+
+Route::get('/auth/callback', function () {
+    $githubUser = Socialite::driver('github')->user();
+
+    $user = User::updateOrCreate([
+        'email' => $githubUser->email,
+    ], [
+        'name' => $githubUser->name,
+        'email' => $githubUser->email,
+        'github_token' => $githubUser->token,
+        'github_refresh_token' => $githubUser->refreshToken,
+    ]);
+
+    Auth::login($user);
+
+    return redirect()->route('posts.index');
+});
+
+Route::get('/auth/redirect-g', function () {
+    return Socialite::driver('google')->redirect();
+})->name('auth.google');
+
+Route::get('/auth/callback-g', function () {
+    $googleUser = Socialite::driver('google')->stateless()->user();
+
+    $user = User::updateOrCreate([
+        'email' => $googleUser->email,
+    ], [
+        'name' => $googleUser->name,
+        'email' => $googleUser->email,
+        'google_token' => $googleUser->token,
+        'google_refresh_token' => $googleUser->refreshToken,
+    ]);
+
+    Auth::login($user);
+
+    return redirect()->route('posts.index');
+});
+

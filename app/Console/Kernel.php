@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->job(new PruneOldPostsJob)->daily('00:00');
-        // $schedule->job(new PruneOldPostsJob)->everyMinute();;
+        
     }
 
 
