@@ -5,7 +5,7 @@
 <br> <br>
 
 <div class="container txt-center">
-        <form method="POST" action="{{route('posts.update', $post['id'])}}">
+        <form method="POST" action="{{route('posts.update', $post['id'])}}" enctype="multipart/form-data">
         @method("PUT")
           @csrf
             <div class="mb-3">
@@ -49,6 +49,22 @@
 
             @if ($errors->has('post_creator'))
             @foreach ($errors->get('post_creator') as $error)
+
+            <div class="alert-danger">
+            <p>{{ $error }}</p>
+            </div>
+
+            @endforeach
+            @endif
+
+            <div class="custom-file mt-1">
+                <input type="file" name="image"  id="image" class="border border-none w-100" style="color:transparent;" onchange="this.style.color='black';" title="">
+
+            </div>
+            <br> <br>
+
+            @if ($errors->has('image'))
+            @foreach ($errors->get('image') as $error)
 
             <div class="alert-danger">
             <p>{{ $error }}</p>

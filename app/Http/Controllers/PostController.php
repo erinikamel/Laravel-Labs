@@ -8,37 +8,18 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Post;
 use App\Models\User;
 use App\Http\Requests\StorePostRequest;
+use App\Jobs\PruneOldPostsJob;
 use App\Models\Comment;
 use Carbon\Carbon;
-
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
-
-    // public function getPost($postId){
-
-    //     $allPosts = Post::all();
-
-    //     $matchedPost='';
-
-    //     foreach ($allPosts as $p) {
-    //         if($p['id'] == $postId){
-    //             $matchedPost=$p;
-    //             return $p;
-    //         }
-    //     }
-    // }
-
-    //invoke it like this in methods
-    //'post' =>  $this->getPost($postId),
-
-
     public function index()
     {
         $allPosts = Post::paginate(7);
 
-        // dd($allPosts);
         return view('posts.index', [
           'posts' => $allPosts
         ]);
@@ -56,10 +37,16 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         $data = request()->all();
-
-        //you can save each separately as follows
+         //you can save each separately as follows
         //$title = request()->title
 
+        if(request()->file('image')){
+        $image= request()->file('image')->getClientOriginalName();
+        $path = request()->file('image')->storeAs('posts',$image,'laravelLab');
+        }
+        else {
+        $path = null;
+        }
         // save to model named Post
         Post::create([
             //you can define it any way from those
@@ -68,9 +55,8 @@ class PostController extends Controller
             'title' => $data['title'],
             'description' => $data['description'],
             'user_id' => $data['post_creator'],
+            'image' => $path
         ]);
-
-
 
         return to_route('posts.index');
     }
@@ -86,13 +72,37 @@ class PostController extends Controller
 
     public function update(StorePostRequest $request, $postId){
 
+
         $data = request()->all();
 
-        Post::find($postId)->update([
-            'title' => $data['title'],
-            'description' => $data['description'],
-            'user_id' => $data['post_creator'],
-        ]);
+            Post::find($postId)->update([
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'user_id' => $data['post_creator'],
+            ]);
+
+            if (request()->file('image')){
+
+                $oldImage=Post::find($postId)->image;
+
+                $lastStandingImgArray =  DB::select( DB::raw("select image from posts group by image having count(*) = 1"));
+
+                foreach ($lastStandingImgArray as $element)
+                {
+                if ($element->image == $oldImage)
+                    {
+                    File::delete('imgs/'.$oldImage);
+                    }
+                }
+                $image= request()->file('image')->getClientOriginalName();
+
+                $path = request()->file('image')->storeAs('posts',$image,'laravelLab');
+
+                Post::find($postId)->update([
+                    'image' =>$path
+                ]);
+
+        }
 
         return to_route('posts.index');
     }
@@ -112,10 +122,22 @@ class PostController extends Controller
 
     public function destroy($postId){
 
+        $oldImage=Post::find($postId)->image;
+
+        $lastStandingImgArray =  DB::select( DB::raw("select image from posts group by image having count(*) = 1"));
+
+        foreach ($lastStandingImgArray as $element)
+        {
+            if ($element->image == $oldImage)
+                {
+                    File::delete('imgs/'.$oldImage);
+
+                }
+        }
+
         Post::find($postId)->delete();
-
         return to_route('posts.index');
-    }
 
+    }
 
 }

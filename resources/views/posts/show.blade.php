@@ -3,15 +3,17 @@
 @section('title') Show @endsection
 @section('content')
 <br><br>
-
-
 <div class="card">
-  <h5 class="card-header">Post Info</h5>
+  <h5 class="card-header">Info</h5>
   <div class="card-body">
     <h5 class="card-title">Title: {{$post['title']}}</h5>
     <p class="card-text">Description: {{$post['description']}}</p>
   </div>
 </div>
+<br>
+    @if ($post->image)
+    <img src="/imgs/{{$post['image']}}" class="img-thumbnail rounded mx-auto d-block" style="width:100%; height:auto">
+    @endif
 
 <br>
 <div class="card">
@@ -38,9 +40,10 @@
 
 @foreach ($post->comments as $comment)
     <div class="border border-light border-2 p-2">{{$comment->body}}
-        <br> <small class="text-muted">Posted by: {{$comment->user?->name}}</small>
+
         <br> <small class="text-muted">Posted in: {{\Carbon\Carbon::parse($comment['created_at'])->format('F Y')}}</small>
     </div>
     <br>
 @endforeach
+
 @endsection

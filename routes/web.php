@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
-
+use App\Jobs\PruneOldPostsJob;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -41,3 +41,12 @@ Route::post('/post/{post}', [CommentController::class, 'store'])->name('posts.co
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/delete-old-posts', function () {
+
+   $pruneOldPostsJob= new PruneOldPostsJob;
+   dispatch($pruneOldPostsJob);
+
+   return 'Removing older posts...';
+
+});

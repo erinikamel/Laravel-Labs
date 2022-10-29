@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePostRequest extends FormRequest
 {
@@ -25,20 +26,21 @@ class StorePostRequest extends FormRequest
     {
         // dd($this->all(),$this->method());
 
-        $rule= [
+        $rules= [
                 'title' => ['required', 'min:3', 'unique:posts'],
                 'description' => ['required', 'min:10'],
                 'post_creator' => ['required', 'exists:users,id'],
+                'image' => 'mimes:jpg,png,jpeg'
         ];
 
         if ($this->method() =='PUT'){
 
-            $rule = array_merge($rule, ['title' => ['required', 'min:3', 'unique:posts,title,'.$this->route()->post]]);
+            $rules = array_merge($rules, ['title' => ['required', 'min:3', 'unique:posts,title,'.$this->route()->post]]);
         }
 
-        // dd($rule);
+        // dd($rules);
 
-        return $rule;
+        return $rules;
     }
 
 
@@ -50,7 +52,8 @@ public function messages()
             'title.min' => 'Title should be at least 3 characters',
             'description.required' => 'This field is required',
             'description.min' => 'Description should be at least 10 characters',
-            'post_creator.required' => 'This field is required', 'post_creator.exists' => 'Invalid value for select options'
+            'post_creator.required' => 'This field is required', 'post_creator.exists' => 'Invalid value for select options',
+            'image' => 'File format not valid'
     ];
 }
 }

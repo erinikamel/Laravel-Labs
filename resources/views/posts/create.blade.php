@@ -4,7 +4,8 @@
 @section('content')
 <br> <br>
 <div class="container txt-center">
-        <form method="POST" action="{{route('posts.store')}}">
+
+        <form method="POST" action="{{route('posts.store')}}" enctype="multipart/form-data">
           @csrf
             <div class="mb-3">
               <label for="exampleInputEmail1" class="form-label">Title</label>
@@ -59,8 +60,24 @@
             @endforeach
             @endif
 
+           <div class="custom-file mt-1">
+                <input type="file" name="image" class="border border-none w-100">
+            </div>
+            <br> <br>
+
+            @if ($errors->has('image'))
+            @foreach ($errors->get('image') as $error)
+
+            <div class="alert-danger">
+            <p>{{ $error }}</p>
+            </div>
+
+            @endforeach
+            @endif
 
             <button type="submit" class="btn btn-success">Create</button>
+
           </form>
+
           </div>
 @endsection
